@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Upload test</title>
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"
+            integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <form id="upload-form">
+        <p>
+            Id:
+            <input type="text" name="id" id="id">
+        </p>
+        <p>
+            Name:
+            <input type="text" name="name" id="name">
+        </p>
+        <p>
+            Description:
+            <input type="text" name="description" id="description">
+        </p>
+        <p>
+            <input type="submit">
+        </p>
+    </form>
+
+    <hr />
+
+    <form id="upload-file">
+        <p>
+            Song:
+            <input type="file" name="song" id="song">
+        </p>
+        <p>
+            <input type="submit">
+        </p>
+    </form>
+
+    <script>
+        var id = null;
+        $.fn.serializeObject = function() {
+
+            var form = {};
+            $.each($(this).serializeArray(), function (i, field) {
+                form[field.name] = field.value || "";
+            });
+
+            return form;
+        };
+
+        $(function() { // on document load
+            $('#upload-form').submit(function (e) { // set onsubmit event to the form
+                e.preventDefault();
+                var mId = $("#id").val();
+                var mName = $("#name").val();
+                var mDescription = $("#description").val();
+                console.log(mId);
+                console.log(mName);
+                console.log(mDescription);
+
+                var data = JSON.stringify({
+                    name: mName,
+                    id: mId,
+                    description: mDescription
+                })
+
+                //var data = $('#upload-form').serializeObject();//.serializeArray(); // serialize all the data in the form
+                //console.log(data);
+
+                $.ajax({
+                    url: 'http://localhost:8080/api/songs', // php script to retern json encoded string
+                    data: data,  // serialized data to send on server
+                    dataType: 'json', // set recieving type - JSON in case of a question
+                    type: 'POST', // set sending HTTP Request type
+                    async: false,
+                    contentType: "application/json",
+                    success: function (data) { // callback method for further manipulations
+                        id = data.message;
+                        console.log("The id is " + id);
+                    },
+                    error: function (data) { // if error occured
+                        console.log("Error " + data);
+                    }
+                });
+                return false;
+            });
+
+            $('#upload-file').submit(function (e) { // set onsubmit event to the form
+                e.preventDefault();
+                var formData = new FormData();
+                formData.append('song', $('#song')[0].files[0]);
+
+                $.ajax({
+                    url : 'http://localhost:8080/api/songs/upload/' + id,
+                    type : 'POST',
+                    data : formData,
+                    processData: false,  // tell jQuery not to process the data
+                    contentType: false,  // tell jQuery not to set contentType
+                    success : function(data) {
+                        console.log(data);
+                    },
+                    error: function (data) { // if error occured
+                        console.log("Error " + data);
+                    }
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

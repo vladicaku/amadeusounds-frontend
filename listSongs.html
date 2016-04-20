@@ -1,0 +1,31 @@
+<html>
+<head>
+    <title>List Songs</title>
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-2.2.3.min.js"
+            integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="my-div">
+    </div>
+<script>
+    $(document).ready(function () {
+        $.ajax({
+            url : 'http://localhost:8080/songs/latest',
+            type : 'GET',
+            data : {
+                page: 2,
+                size: 5
+            },
+            success : function(data) {
+                console.log(data);
+                $("#my-div").text(data);
+            },
+            error: function (data) {
+                console.log("Error " + data);
+            }
+        });
+    });
+</script>
+</body>
+</html>
