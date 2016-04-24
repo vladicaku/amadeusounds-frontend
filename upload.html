@@ -7,6 +7,7 @@
             integrity="sha256-a23g1Nt4dtEYOj7bR+vTu7+T8VP13humZFBJNIYoEJo=" crossorigin="anonymous"></script>
 </head>
 <body>
+    <h3>Create song</h3>
     <form id="upload-form">
         <p>
             Id:
@@ -25,8 +26,7 @@
         </p>
     </form>
 
-    <hr />
-
+    <h3>Upload song file</h3>
     <form id="upload-file">
         <p>
             Song:
@@ -37,20 +37,167 @@
         </p>
     </form>
 
-    <script>
-        var id = null;
-        $.fn.serializeObject = function() {
+    <hr />
 
-            var form = {};
-            $.each($(this).serializeArray(), function (i, field) {
-                form[field.name] = field.value || "";
+
+    <!-- Images -->
+
+    <!-- Create image -->
+    <h3>Create image</h3>
+    <form id="create-form-image">
+        <p>
+            Timing:
+            <input type="number" name="timing" id="create-form-timing">
+        </p>
+        <p><input type="submit"></p>
+    </form>
+
+    <!-- Upload image file -->
+    <h3>Upload image file</h3>
+    <form id="upload-form-image">
+        <p>
+            Image:
+            <input type="file" name="image" id="upload-form-image-file">
+        </p>
+        <p><input type="submit"></p>
+    </form>
+
+    <!-- Update image -->
+    <h3>Update image</h3>
+    <form id="update-form-image">
+        <p>
+            Timing:
+            <input type="number" name="timing" id="update-form-timing">
+        </p>
+        <p><input type="submit"></p>
+    </form>
+
+    <!-- Update image file -->
+    <h3>Update image file</h3>
+    <form id="update-form-upload-image">
+        <p>
+            Image:
+            <input type="file" name="image" id="update-form-upload-image-file">
+        </p>
+        <p><input type="submit"></p>
+    </form>
+
+
+    <script>
+        var songId = null;
+        var songImageId = null;
+
+        $(function() {
+            /* ------------------------- Song Image ---------------------- */
+            /* Create image */
+            $("#create-form-image").submit(function(e) {
+                e.preventDefault();
+                var data = JSON.stringify({
+                    id: null,
+                    timing: $("#create-form-timing").val()
+                });
+                $.ajax({
+                    url: 'http://localhost:8080/api/admin/images/song/1',
+                    data: data, //$("#create-form-image").serialize(),
+                    dataType: 'json',
+                    type: 'POST',
+                    contentType: "application/json",
+                    success: function (data) {
+                        songImageId = data.message;
+                        console.log("The imageId is " + songImageId);
+                    },
+                    error: function (data) {
+                        console.log("Error " + data);
+                    }
+                });
             });
 
-            return form;
-        };
+            /* Upload image file */
+            $("#upload-form-image").submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData();
+                formData.append('image', $('#upload-form-image-file')[0].files[0]);
+                $.ajax({
+                    url: 'http://localhost:8080/api/admin/images/upload/' + songImageId,
+                    type : 'POST',
+                    data : formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        console.log(data.message);
+                    },
+                    error: function (data) {
+                        console.log("Error " + data);
+                    }
+                });
+            });
 
-        $(function() { // on document load
-            $('#upload-form').submit(function (e) { // set onsubmit event to the form
+            /* Update image */
+            $("#update-form-image").submit(function(e) {
+                e.preventDefault();
+                var data = JSON.stringify({
+                    id: songImageId,
+                    timing: $("#update-form-timing").val()
+                });
+                $.ajax({
+                    url: 'http://localhost:8080/api/admin/images/' + songImageId,
+                    data: data, //$("#update-form-image").serialize(),
+                    dataType: 'json',
+                    type: 'PUT',
+                    contentType: "application/json",
+                    success: function (data) {
+                        console.log(data.message);
+                    },
+                    error: function (data) {
+                        console.log("Error " + data);
+                    }
+                });
+            });
+
+            /* Update image file -- upload again */
+            $("#update-form-upload-image").submit(function(e) {
+                e.preventDefault();
+                var formData = new FormData();
+                formData.append('image', $('#update-form-upload-image-file')[0].files[0]);
+                $.ajax({
+                    url: 'http://localhost:8080/api/admin/images/upload/' + songImageId,
+                    type : 'POST',
+                    data : formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (data) {
+                        console.log(data.message);
+                    },
+                    error: function (data) {
+                        console.log("Error " + data);
+                    }
+                });
+            });
+
+            /* ----------------------------------------------------------------- */
+
+
+
+            $("#create-form-image").submit(function(e) {
+                e.preventDefault();
+                $.ajax({
+                    url: 'http://localhost:8080/api/admin/images/1',
+                    data: $("#create-form-image").serialize(),
+                    dataType: 'json',
+                    type: 'POST',
+                    contentType: "application/json",
+                    success: function (data) {
+                        songImageId = data.message;
+                        console.log("The imageId is " + songImageId);
+                    },
+                    error: function (data) {
+                        console.log("Error " + data);
+                    }
+                });
+            });
+
+
+            $('#upload-form').submit(function (e) {
                 e.preventDefault();
                 var mId = $("#id").val();
                 var mName = $("#name").val();
@@ -69,15 +216,15 @@
                 //console.log(data);
 
                 $.ajax({
-                    url: 'http://localhost:8080/api/songs', // php script to retern json encoded string
+                    url: 'http://localhost:8080/api/admin/songs', // php script to retern json encoded string
                     data: data,  // serialized data to send on server
                     dataType: 'json', // set recieving type - JSON in case of a question
                     type: 'POST', // set sending HTTP Request type
                     async: false,
                     contentType: "application/json",
                     success: function (data) { // callback method for further manipulations
-                        id = data.message;
-                        console.log("The id is " + id);
+                        songId = data.message;
+                        console.log("The id is " + songId);
                     },
                     error: function (data) { // if error occured
                         console.log("Error " + data);
@@ -86,27 +233,37 @@
                 return false;
             });
 
-            $('#upload-file').submit(function (e) { // set onsubmit event to the form
+            $('#upload-file').submit(function (e) {
                 e.preventDefault();
                 var formData = new FormData();
                 formData.append('song', $('#song')[0].files[0]);
 
                 $.ajax({
-                    url : 'http://localhost:8080/api/songs/upload/' + id,
+                    url : 'http://localhost:8080/api/songs/upload/' + songId,
                     type : 'POST',
                     data : formData,
-                    processData: false,  // tell jQuery not to process the data
-                    contentType: false,  // tell jQuery not to set contentType
+                    processData: false,
+                    contentType: false,
                     success : function(data) {
                         console.log(data);
                     },
-                    error: function (data) { // if error occured
+                    error: function (data) {
                         console.log("Error " + data);
                     }
                 });
             });
         });
+
+        //        $.fn.serializeObject = function() {
+        //            var form = {};
+        //            $.each($(this).serializeArray(), function (i, field) {
+        //                form[field.name] = field.value || "";
+        //            });
+        //
+        //            return form;
+        //        };
     </script>
+
 
 </body>
 </html>
